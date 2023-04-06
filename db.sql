@@ -6,6 +6,8 @@ create table if not exists aquaRob (
   latitude float,
   longitude float,
   altitude float,
-  rssi float 
+  rssi float,
+  snr float,
+  turbidite float,
   PRIMARY KEY(id)
 )

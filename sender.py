@@ -1,20 +1,58 @@
 import struct
-import socket
+import paho.mqtt.client as paho
+from paho import mqtt
 
-temperature = 7
-turbidite = 3
-latitude = 3.7749
-longitude = -18.7117
-altitude = 0.5
-rssi = -102
-snr = 9
+# Calbacks -------------------------------------------------------------------------
 
-host = socket.gethostbyname(socket.gethostname())
-port = 12345
-# b4e b'%\x00\xb9PV\xd8@I \xd8'
-packed_data = struct.pack('2b4fb', temperature, turbidite, latitude, longitude, altitude, rssi, snr)
+def on_connect(client, userdata, flags, rc, properties=None):
+    print("CONNACK received with code %s.\nThe response flag is: %s" % (rc, flags))
 
-connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connection.connect((host, port))
-connection.send(packed_data)
-connection.close()
+def on_subscribe(client, userdata, mid, granted_qos, properties=None):
+    print("Subscribed: " + str(mid))
+    print( granted_qos[0] )
+
+def on_message(client, userdata, msg):
+    data = msg.payload.decode
+    print(msg.topic + " " + str(msg.qos) + ": " + msg.payload)
+
+def on_publish(client, userdata, mid, properties=None):
+    print("mid: " + str(mid))
+# end of callbacks ----------------------------------------------------------------
+
+
+
+def main() -> None:
+    temperature = 7
+    turbidite = 3
+    latitude = 3.7749
+    longitude = -18.7117
+    altitude = 0.5
+    rssi = -102
+    snr = 9
+
+    #b'\x07\x03\x00\x00\xf6\x97q@\x90\xb1\x95\xc1\x00\x00\x00?\x00\x00\xcc\xc2\t'
+    packed_data = struct.pack('2b4fb', temperature, turbidite, latitude, longitude, altitude, rssi, snr)
+    client = paho.Client(client_id="", userdata=None)
+    client.on_connect = on_connect
+    
+    # connect to HiveMQ Cloud on port 8883 
+    client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+    client.username_pw_set("aquarob", "aquarob203")
+    client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
+
+    # connect the a local broker
+    #client.connect("0.0.0.0", 1883)
+    
+    client.on_subscribe = on_subscribe
+    client.on_message = on_message
+    client.on_publish = on_publish
+
+    client.publish("/aquaRob", payload=packed_data, qos=1)
+    client.loop_forever()
+    pass
+
+
+if __name__  == "__main__":
+    main()
+
+
