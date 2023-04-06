@@ -1,6 +1,5 @@
 # TODO(akram): error handling ei. temp = -1 ==> an error has occured
 import mysql.connector
-import socket
 import struct
 import paho.mqtt.client as paho
 from paho import mqtt
