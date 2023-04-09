@@ -9,14 +9,18 @@ from paho import mqtt
 # Calbacks -------------------------------------------------------------------------
 
 def on_connect(client, userdata, flags, rc, properties=None):
-    print("CONNACK received with code %s.\nThe response flag is: %s" % (rc, flags))
-
+    if rc == 0:
+        print("CONNACK received with code %s.\nThe response flag is: %s" % (rc, flags))
+    else: 
+        print("Bad Connection")
+    
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
     print("Subscribed: " + str(mid))
     print( granted_qos[0] )
 
 def on_message(client, userdata, msg):
     #DataBase connection
+    print("recived message %s\n\n" %msg.payload.decode())
     mydb = mysql.connector.connect(
         host="mysql-akram203.alwaysdata.net",
         user="akram203",
@@ -47,12 +51,13 @@ def main() -> int:
     client.on_connect = on_connect
     
     # connect to HiveMQ Cloud on port 8883 
-    client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-    client.username_pw_set("aquarob", "aquarob203")
-    client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
+    #client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+    #client.username_pw_set("aquarob", "aquarob203")
+    #client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
 
     # connect the a local broker
-    #client.connect("0.0.0.0", 1883)
+    client.username_pw_set("aquarob","aquarob")
+    client.connect("192.168.1.4",port=9000)
     
     client.on_subscribe = on_subscribe
     client.on_message = on_message
