@@ -22,6 +22,7 @@ def on_publish(client, userdata, mid, properties=None):
 
 
 def main() -> None:
+    device_id = 7
     temperature = 7
     turbidite = 3
     latitude = 3.7749
@@ -31,25 +32,24 @@ def main() -> None:
     snr = 9
 
     #b'\x07\x03\x00\x00\xf6\x97q@\x90\xb1\x95\xc1\x00\x00\x00?\x00\x00\xcc\xc2\t'
-    packed_data = struct.pack('2b4fb', temperature, turbidite, latitude, longitude, altitude, rssi, snr)
+    packed_data = struct.pack('b2f2d2fd',device_id, temperature, turbidite, latitude, longitude, altitude, rssi, snr)
     client = paho.Client(client_id="", userdata=None)
     client.on_connect = on_connect
     
     # connect to HiveMQ Cloud on port 8883 
-    client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-    client.username_pw_set("aquarob", "aquarob203")
-    client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
+    # client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+    client.username_pw_set("aquarob", "aquarob")
+    # client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
 
-    # connect the a local broker
-    #client.connect("0.0.0.0", 1883)
+    client.connect("0.0.0.0", 9000)
     
     client.on_subscribe = on_subscribe
     client.on_message = on_message
     client.on_publish = on_publish
 
-    client.publish("/aquaRob", payload=packed_data, qos=1)
+    client.publish("/testtopic", payload=packed_data, qos=1)
     client.loop_forever()
-    pass
+    
 
 
 if __name__  == "__main__":

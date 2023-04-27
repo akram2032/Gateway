@@ -2,6 +2,7 @@
 import mysql.connector
 import struct
 import paho.mqtt.client as paho
+import sys
 from paho import mqtt
 
 # Mqtt connection
@@ -20,7 +21,6 @@ def on_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 def on_message(client, userdata, msg):
     #DataBase connection
-    print("recived message %s\n\n" %msg.payload.decode())
     mydb = mysql.connector.connect(
         host="mysql-akram203.alwaysdata.net",
         user="akram203",
@@ -29,14 +29,14 @@ def on_message(client, userdata, msg):
     )
     cursor = mydb.cursor()
 
-    temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('2b4fb', msg.payload)
+    device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('b2f2d2fd', msg.payload)
     data = f"""Recived Data:\nTemperature: {temp}.\n turbidite:{turbidite}\n.
     latitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\n
     Rssi/Snr: {rssi}, {snr}.\n"""
     
-    sql = f"""INSERT INTO aquaRob2(temperature, longitude, latitude,
+    sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
                                      altitude, rssi,  snr, turbidite) Values(
-                {temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}
+                {device_id},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}
                 )"""
     cursor.execute(sql)
     mydb.commit() 
@@ -49,23 +49,34 @@ def on_message(client, userdata, msg):
 def main() -> int:
     client = paho.Client(client_id="", userdata=None)
     client.on_connect = on_connect
-    
+    topic,username,password = sys.argv[1:4]    
     # connect to HiveMQ Cloud on port 8883 
     #client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
     #client.username_pw_set("aquarob", "aquarob203")
     #client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
 
     # connect the a local broker
-    client.username_pw_set("aquarob","aquarob")
-    client.connect("192.168.1.4",port=9000)
-    
+    try:
+        client.username_pw_set(username,password)
+        client.connect("0.0.0.0",port=9000)
+    except:
+        print("An error has occured check your credentials an retry\n")
+        exit()
+    print(f"Subscribed to /{topic}")
     client.on_subscribe = on_subscribe
     client.on_message = on_message
 
-    client.subscribe("/aquaRob", qos=1)
+    client.subscribe(f"/{topic}", qos=1)
     client.loop_forever()
     return 0 
 
 if __name__ == "__main__":
-    main()
+    help_ = """Software usage: 
+python main.py |sub_Topic| |username| |password|
+        """
+    if len(sys.argv) == 4: 
+        print(f"topic {sys.argv[1]}.\nusername {sys.argv[2]}.\npassword {sys.argv[3]}")
+        main()
+    print (help_)
+    exit()
 
