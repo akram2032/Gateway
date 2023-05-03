@@ -29,7 +29,7 @@ def main() -> None:
     longitude = -18.7117
     altitude = 0.5
     rssi = -102
-    snr = 9
+    snr = 999
 
     #b'\x07\x03\x00\x00\xf6\x97q@\x90\xb1\x95\xc1\x00\x00\x00?\x00\x00\xcc\xc2\t'
     packed_data = struct.pack('b2f2d2fd',device_id, temperature, turbidite, latitude, longitude, altitude, rssi, snr)
@@ -41,13 +41,13 @@ def main() -> None:
     client.username_pw_set("aquarob", "aquarob")
     # client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
 
-    client.connect("0.0.0.0", 9000)
+    client.connect("172.17.0.2", 9000)
     
     client.on_subscribe = on_subscribe
     client.on_message = on_message
     client.on_publish = on_publish
 
-    client.publish("/testtopic", payload=packed_data, qos=1)
+    client.publish("/testpython", payload=packed_data, qos=1)
     client.loop_forever()
     
 

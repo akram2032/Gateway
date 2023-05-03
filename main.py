@@ -11,13 +11,13 @@ from paho import mqtt
 
 def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0:
-        print("CONNACK received with code %s.\nThe response flag is: %s" % (rc, flags))
+        print("Connected.")
     else: 
         print("Bad Connection")
     
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
     print("Subscribed: " + str(mid))
-    print( granted_qos[0] )
+    print("Granted QOS: %s"%granted_qos[0] )
 
 def on_message(client, userdata, msg):
     #DataBase connection
@@ -49,7 +49,7 @@ def on_message(client, userdata, msg):
 def main() -> int:
     client = paho.Client(client_id="", userdata=None)
     client.on_connect = on_connect
-    topic,username,password = sys.argv[1:4]    
+    topic, username, password, ip, port_ = sys.argv[1:6]    
     # connect to HiveMQ Cloud on port 8883 
     #client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
     #client.username_pw_set("aquarob", "aquarob203")
@@ -58,7 +58,7 @@ def main() -> int:
     # connect the a local broker
     try:
         client.username_pw_set(username,password)
-        client.connect("0.0.0.0",port=9000)
+        client.connect(f"{ip}",port=int(port_))
     except:
         print("An error has occured check your credentials an retry\n")
         exit()
@@ -72,10 +72,10 @@ def main() -> int:
 
 if __name__ == "__main__":
     help_ = """Software usage: 
-python main.py |sub_Topic| |username| |password|
+python main.py |sub_Topic| |username| |password| |IP addr| |port|  
         """
-    if len(sys.argv) == 4: 
-        print(f"topic {sys.argv[1]}.\nusername {sys.argv[2]}.\npassword {sys.argv[3]}")
+    if len(sys.argv) == 6: 
+        print(f"Connecting to {sys.argv[4]}:{sys.argv[5]}...")
         main()
     print (help_)
     exit()
