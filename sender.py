@@ -22,7 +22,7 @@ def on_publish(client, userdata, mid, properties=None):
 
 
 def main() -> None:
-    device_id = 7
+    device_id = 1
     temperature = 7
     turbidite = 3
     latitude = 3.7749
