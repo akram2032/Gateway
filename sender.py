@@ -1,7 +1,7 @@
 import struct
 import paho.mqtt.client as paho
 from paho import mqtt
-
+import sys
 # Calbacks -------------------------------------------------------------------------
 
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -41,7 +41,7 @@ def main() -> None:
     client.username_pw_set("aquarob", "aquarob")
     # client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
 
-    client.connect("172.17.0.2", 9000)
+    client.connect(f"{sys.argv[1]}", int(sys.argv[2]))
     
     client.on_subscribe = on_subscribe
     client.on_message = on_message
@@ -53,6 +53,9 @@ def main() -> None:
 
 
 if __name__  == "__main__":
-    main()
+    if len(sys.argv) == 3:
+        main()
+        exit()
+    print("Useage: sender.py |ip address| |port|")
 
 

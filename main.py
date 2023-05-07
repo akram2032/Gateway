@@ -21,28 +21,38 @@ def on_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 def on_message(client, userdata, msg):
     #DataBase connection
-    mydb = mysql.connector.connect(
-        host="mysql-akram203.alwaysdata.net",
-        user="akram203",
-        password="akram2001",
-        database="akram203_pfe"
-    )
-    cursor = mydb.cursor()
+    try:
+        mydb = mysql.connector.connect(
+            host="mysql-akram203.alwaysdata.net",
+            user="akram203",
+            password="akram2001",
+            database="akram203_pfe"
+        )
+        cursor = mydb.cursor()
+    except mysql.connector.errors.InterfaceError:
+        print('Error while trying to connect to the dataBase')
+        return
 
-    device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('b2f2d2fd', msg.payload)
-    data = f"""Recived Data:\nTemperature: {temp}.\n turbidite:{turbidite}\n.
-    latitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\n
-    Rssi/Snr: {rssi}, {snr}.\n"""
-    
-    sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
+    try:
+        device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('b2f2d2fd', msg.payload)
+        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\nRssi/Snr: {rssi}, {snr}.\n"""
+        print(data)
+    except struct.error:
+        print('Error on data format')
+        return
+    try:
+        sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
                                      altitude, rssi,  snr, turbidite) Values(
                 {device_id},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}
                 )"""
-    cursor.execute(sql)
-    mydb.commit() 
-    print('data inserted')
-    cursor.close()
-    mydb.close()
+        cursor.execute(sql)
+        mydb.commit() 
+        print('data inserted')
+        cursor.close()
+        mydb.close()
+    except mysql.connector.errors.ProgrammingError:
+        print("Request error => Data not inserted.")
+        return 
 
 # end of callbacks ----------------------------------------------------------------
 
