@@ -9,18 +9,21 @@ from paho import mqtt
 
 # Calbacks -------------------------------------------------------------------------
 
+
 def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0:
         print("Connected.")
     else: 
         print("Bad Connection")
-    
+
+
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
     print("Subscribed: " + str(mid))
     print("Granted QOS: %s"%granted_qos[0] )
 
+
 def on_message(client, userdata, msg):
-    #DataBase connection
+    # DataBase connection
     try:
         mydb = mysql.connector.connect(
             host="mysql-akram203.alwaysdata.net",
@@ -39,12 +42,16 @@ def on_message(client, userdata, msg):
         # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
         data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.\n"""
         print(data)
+
     except struct.error:
         print(f"Recived data : {msg.payload}")
         print('Error on data format')
         return
+
     except:
         print("errorG")
+
+
     try:
         sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
                                      altitude, rssi,  snr, turbidite) Values(
@@ -61,14 +68,15 @@ def on_message(client, userdata, msg):
 
 # end of callbacks ----------------------------------------------------------------
 
+
 def main() -> int:
     client = paho.Client(client_id="", userdata=None)
     client.on_connect = on_connect
     topic, username, password, ip, port_ = sys.argv[1:6]    
     # connect to HiveMQ Cloud on port 8883 
-    #client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-    #client.username_pw_set("aquarob", "aquarob203")
-    #client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
+    # client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+    # client.username_pw_set("aquarob", "aquarob203")
+    # client.connect("948d5240da044a759077ffa5e4b8d98a.s2.eu.hivemq.cloud", 8883)
 
     # connect the a local broker
     try:
@@ -84,6 +92,7 @@ def main() -> int:
     client.subscribe(f"/{topic}", qos=1)
     client.loop_forever()
     return 0 
+
 
 if __name__ == "__main__":
     help_ = """Software usage: 
