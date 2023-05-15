@@ -37,13 +37,20 @@ def on_message(client, userdata, msg):
         return
 
     try:
-        device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('b2f2d2fd', msg.payload)
-        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\nRssi/Snr: {rssi}, {snr}.\n"""
+        print("message: ",msg.payload)
+        device_id, temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('B5fdb', msg.payload)
+        # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
+        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.\n"""
         print(data)
 
     except struct.error:
+        print(f"Recived data : {msg.payload}")
         print('Error on data format')
         return
+
+    except:
+        print("errorG")
+
 
     try:
         sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
