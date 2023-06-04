@@ -38,9 +38,13 @@ def on_message(client, userdata, msg):
 
     try:
         print("message: ",msg.payload)
-        device_id, temp, turbidite, latitude, longitude, altitude, rssi, snr = struct.unpack('B5fdb', msg.payload)
+        device_id, temp, turbidite, latitude, longitude, altitude, distance,rssi, snr = struct.unpack('B6fdb', msg.payload)
         # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
-        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.\nlongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.\n"""
+        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.
+        \nlongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.\n
+        RSSI : {rssi}\n
+        SNR : {snr}\n
+        """
         print(data)
 
     except struct.error:
@@ -54,8 +58,8 @@ def on_message(client, userdata, msg):
 
     try:
         sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
-                                     altitude, rssi,  snr, turbidite) Values(
-                {device_id},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}
+                                     altitude, rssi,  snr, turbidite, distance) Values(
+                {device_id},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}, {distance}
                 )"""
         cursor.execute(sql)
         mydb.commit() 
