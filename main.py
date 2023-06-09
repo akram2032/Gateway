@@ -19,17 +19,19 @@ def on_connect(client, userdata, flags, rc, properties=None):
 
 def on_subscribe(client, userdata, mid, granted_qos, properties=None):
     print("Subscribed: " + str(mid))
-    print("Granted QOS: %s"%granted_qos[0] )
+    print("Granted QOS: %s" %granted_qos[0])
 
 
 def on_message(client, userdata, msg):
     # DataBase connection
     try:
         mydb = mysql.connector.connect(
-            host="mysql-akram203.alwaysdata.net",
-            user="akram203",
-            password="akram2001",
-            database="akram203_pfe"
+            # host="mysql-akram203.alwaysdata.net",
+            host='localhost',
+            user="aquarob",
+            password="aquarob",
+            database="bathyrob",
+            auth_plugin='caching_sha2_password'
         )
         cursor = mydb.cursor()
     except mysql.connector.errors.InterfaceError:
@@ -38,7 +40,7 @@ def on_message(client, userdata, msg):
 
     try:
         print("message: ",msg.payload)
-        device_id, temp, turbidite, latitude, longitude, altitude, distance,rssi, snr = struct.unpack('B6fdb', msg.payload)
+        device_id, latitude, longitude, altitude, distance,temp,turbidite, rssi, snr = struct.unpack('B6fdd', msg.payload)
         # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
         data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.
         \nlongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.\n
@@ -57,9 +59,9 @@ def on_message(client, userdata, msg):
 
 
     try:
-        sql = f"""INSERT INTO aquaRob2(device_id, temperature, longetude, latitude,
-                                     altitude, rssi,  snr, turbidite, distance) Values(
-                {device_id},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}, {distance}
+        sql = f"""INSERT INTO messages(device_id, temperature, longitude, latitude,
+                                     altitude, rssi,  snr, turbidite, depth) Values(
+                {1},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}, {distance}
                 )"""
         cursor.execute(sql)
         mydb.commit() 

@@ -25,14 +25,15 @@ def main() -> None:
     device_id = 1
     temperature = 7
     turbidite = 3
-    latitude = 3.7749
-    longitude = -18.7117
+    latitude = 2.7749
+    longitude = 31.7117
     altitude = 0.5
+    distance = 1
     rssi = -102
     snr = 999
 
     #b'\x07\x03\x00\x00\xf6\x97q@\x90\xb1\x95\xc1\x00\x00\x00?\x00\x00\xcc\xc2\t'
-    packed_data = struct.pack('b2f2d2fd',device_id, temperature, turbidite, latitude, longitude, altitude, rssi, snr)
+    packed_data = struct.pack('B6fdd',device_id, latitude,longitude,altitude, distance, temperature, turbidite, rssi, snr)
     client = paho.Client(client_id="", userdata=None)
     client.on_connect = on_connect
     
@@ -51,8 +52,7 @@ def main() -> None:
     client.loop_forever()
     
 
-
-if __name__  == "__main__":
+if __name__ == "__main__":
     if len(sys.argv) == 3:
         main()
         exit()
