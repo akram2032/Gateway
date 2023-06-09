@@ -39,6 +39,7 @@ def on_message(client, userdata, msg):
         return
 
     try:
+<<<<<<< Updated upstream
         print("message: ",msg.payload)
         device_id, latitude, longitude, altitude, distance,temp,turbidite, rssi, snr = struct.unpack('B6fdd', msg.payload)
         # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
@@ -47,8 +48,17 @@ def on_message(client, userdata, msg):
         RSSI : {rssi}\n
         SNR : {snr}\n
         """
+=======
+        print("message: ", msg.payload)
+        device_id, temp, turbidite, latitude, longitude, altitude,distance, rssi, snr = struct.unpack('B6fdb', msg.payload)
+        # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
+        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.
+        \nLongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.
+        RSSI : {rssi} \n
+        SNR : {snr}
+        \n"""
+>>>>>>> Stashed changes
         print(data)
-
     except struct.error:
         print(f"Recived data : {msg.payload}")
         print('Error on data format')
