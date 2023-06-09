@@ -1,37 +1,35 @@
--- create the mysql data base 
-
--- message---
-create table if not exists messages(
-  	id int not null auto_increment,
-  	device_id int,
-  	date date, 
-  	time time,
-  	temperature float, 
-  	latitude double,
-  	longitude double,
-  	altitude float,
-  	depth float,
-  	rssi int,
-  	snr double,
-  	turbidite float,
-  	Constraint pk_msg PRIMARY KEY(id),
-  	Constraint fk_message Foreign key (device_id) References devices (device_id)
+---user table---
+CREATE TABLE if not exists users (
+	user_id int(4) AUTO_INCREMENT,
+    username varchar(25),
+    password varchar(25),
+    CONSTRAINT pk_users PRIMARY KEY(user_id)
 );
-
+--- device table----
 create table if not exists devices (
 	device_id int(4), 
 	country varchar(25), 
 	state varchar(25),
 	city varchar(25),
-	added_on date, 
+	added_on date DEFAULT CURRENT_DATE, 
 	added_by int(4),
   	Constraint pk_device PRIMARY KEY(device_id),
   	Constraint fk_devices Foreign key (added_by) References users (user_id)
 );
 
-create table if not exists users (
-	user_id int(4),
-	username varchar(25),
-	password varchar(25),
-	Constraint pk_usr PRIMARY KEY(user_id)
+--- message tables----
+create table if not exists messages (
+    id int(50) not NULL auto_increment PRIMARY KEY,
+    device_id int(4) not null,
+    date date DEFAULT CURRENT_DATE,
+    time Time DEFAULT CURRENT_TIME,
+    temperature float,
+    longitude double,
+    latitude float,
+    altitude float,
+    depth float,
+    rssi int,
+    snr double,
+    turbidite float,
+    CONSTRAINT fk_msg foreign key (device_id) references devices(device_id)
 );
