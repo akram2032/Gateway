@@ -3,6 +3,7 @@ import mysql.connector
 import struct
 import paho.mqtt.client as paho
 import sys
+from datetime import  date,datetime
 from paho import mqtt
 
 # Mqtt connection
@@ -39,7 +40,6 @@ def on_message(client, userdata, msg):
         return
 
     try:
-<<<<<<< Updated upstream
         print("message: ",msg.payload)
         device_id, latitude, longitude, altitude, distance,temp,turbidite, rssi, snr = struct.unpack('B6fdd', msg.payload)
         # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
@@ -48,39 +48,28 @@ def on_message(client, userdata, msg):
         RSSI : {rssi}\n
         SNR : {snr}\n
         """
-=======
-        print("message: ", msg.payload)
-        device_id, temp, turbidite, latitude, longitude, altitude,distance, rssi, snr = struct.unpack('B6fdb', msg.payload)
-        # device_id,temp, turbidite, latitude, longitude, altitude, rssi, snr =  msg.payload.decode()
-        data = f"""\nRecived Data:\n----------------\nTemperature: {temp}.\nTurbidity:{turbidite}\nLatitude:{latitude}.
-        \nLongitude: {longitude}.\nAltitude: {altitude}.\nDistance  {distance}.
-        RSSI : {rssi} \n
-        SNR : {snr}
-        \n"""
->>>>>>> Stashed changes
         print(data)
     except struct.error:
         print(f"Recived data : {msg.payload}")
         print('Error on data format')
         return
-
     except:
         print("errorG")
 
-
     try:
-        sql = f"""INSERT INTO messages(device_id, temperature, longitude, latitude,
-                                     altitude, rssi,  snr, turbidite, depth) Values(
-                {1},{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}, {distance}
+        sql = f"""INSERT INTO messages(device_id,date,time, temperature, longitude, latitude,
+                                        altitude, rssi,  snr, turbidity, depth) Values(
+                {device_id},'{date.today()}','{datetime.now().strftime("%H:%M:%S")}',{temp}, {longitude}, {latitude}, {altitude}, {rssi}, {snr}, {turbidite}, {distance}
                 )"""
         cursor.execute(sql)
-        mydb.commit() 
+        mydb.commit()
         print('data inserted')
         cursor.close()
         mydb.close()
     except mysql.connector.errors.ProgrammingError:
         print("Request error => Data not inserted.")
-        return 
+        print(mysql.connector.errors.ProgrammingError)
+        return
 
 # end of callbacks ----------------------------------------------------------------
 
